@@ -1,16 +1,26 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class EnemyMover : MonoBehaviour
 {
-    // Start is called before the first frame update
+    //Serialized Fields
+    [SerializeField]
+    [Min(0)]
+    float fltVelocity = 3f;
+
+    //Cashe References
+
+
+    //Attributes
+
+
     void Start()
     {
         
     }
 
-    // Update is called once per frame
     void Update()
     {
         
