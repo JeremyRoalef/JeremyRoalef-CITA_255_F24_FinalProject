@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-
+[RequireComponent(typeof(Rigidbody), typeof(PlayerLives))]
 public class PlayerMover : MonoBehaviour
 {
     //Borrowing code from another final project I'm working on to add player movement
@@ -25,13 +25,16 @@ public class PlayerMover : MonoBehaviour
     Rigidbody playerRb;
     Camera mainCam;
     BoxCollider playerCollider;
+    PlayerLives playerLives;
 
-    void Awake()
+    bool hasDied = false;
+
+    void Start()
     {
         InitializeReferences();
     }
 
-    private void InitializeReferences()
+    public void InitializeReferences()
     {
         playerRb = GetComponent<Rigidbody>();
         if (playerRb == null)
@@ -61,6 +64,16 @@ public class PlayerMover : MonoBehaviour
         else
         {
             Debug.Log("Capsule collider found in children");
+        }
+
+        playerLives = GetComponent<PlayerLives>();
+        if (playerLives == null)
+        {
+            Debug.Log("No player lives component found");
+        }
+        else
+        {
+            Debug.Log("Player lives componenet found");
         }
     }
 
@@ -93,7 +106,7 @@ public class PlayerMover : MonoBehaviour
 
         //Read the input values of the movement input
         Vector2 inputDir = movementInput.ReadValue<Vector2>();
-        Debug.Log($"Movement direction: {inputDir}");
+        //Debug.Log($"Movement direction: {inputDir}");
 
         //Direction of movement is relative to the cinemachine's forward direction.
         //Thus, moving the player "forward" is relative to the cinemachine's forward direction
@@ -128,10 +141,10 @@ public class PlayerMover : MonoBehaviour
         }
 
         //moveDir.y = playerRb.velocity.y;
-        Debug.Log($"Move Direction: {moveDir}");
+        //Debug.Log($"Move Direction: {moveDir}");
 
         playerRb.AddForce(moveDir);
-        Debug.Log(playerRb.velocity);
+        //Debug.Log(playerRb.velocity);
 
         //Clamp the min & max velocity for x and z velocity if on the ground
 
@@ -145,4 +158,22 @@ public class PlayerMover : MonoBehaviour
         Debug.DrawRay(transform.position, playerRb.velocity);
     }
 
+    private void OnTriggerEnter(Collider other)
+    {
+        if (hasDied) {return;}
+        if (other.gameObject.CompareTag("Exploder"))
+        {
+            hasDied = true;
+            //If player lives = 1 -> playerlives = 1-1 = 0. Value = 0, so statement is true
+            playerLives.Lives -= 1;
+            Destroy(other.gameObject);
+        }
+    }
+
+    //This method is repeat of a method in player lives. May make into an event or delegate or something.
+    //For now, this'll suffice
+    public void ResetPlayer()
+    {
+        hasDied = false;
+    }
 }
