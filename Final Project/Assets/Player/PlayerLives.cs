@@ -15,6 +15,9 @@ public class PlayerLives : MonoBehaviour
     [Min(1)]
     int maxLives = 3;
 
+    [SerializeField] 
+    Vector3 startPos;
+
     int lives;
     //Property for lives
     public int Lives
@@ -48,14 +51,18 @@ public class PlayerLives : MonoBehaviour
 
     //Cashe References
 
-
-    //Attributes
-    Vector3 startPos;
+    //Attribute
     bool resetLives = true;
+
+    //Delegate for resetting the player
+    public delegate void NotifyPlayerReset();
+    public static NotifyPlayerReset playerReset;
 
     private void Awake()
     {
-        startPos = transform.position;
+        playerReset += ResetPlayerObject;
+
+        transform.position = startPos;
 
         if (resetLives)
         {
@@ -66,11 +73,11 @@ public class PlayerLives : MonoBehaviour
 
     IEnumerator KillPlayer()
     {
-        gameObject.GetComponentInChildren<Renderer>().enabled = false;
+        Player.instance.GetComponentInChildren<Renderer>().enabled = false;
         //Wait to reload scene
         yield return new WaitForSeconds(delayBeforeSceneReload);
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
-        ResetPlayerObject();
+        playerReset?.Invoke();
     }
 
     IEnumerator GameOver()
@@ -81,11 +88,9 @@ public class PlayerLives : MonoBehaviour
         yield return null;
     }
     
-    //This method is similar to method in player mover. May turn into delegate or event. For now, this'll suffice.
     void ResetPlayerObject()
     {
-        GetComponent<PlayerMover>().ResetPlayer();
-        gameObject.GetComponentInChildren<Renderer>().enabled = true;
-        transform.position = startPos;
+        Player.instance.GetComponentInChildren<Renderer>().enabled = true;
+        Player.instance.transform.position = startPos;
     }
 }

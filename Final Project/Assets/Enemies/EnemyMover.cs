@@ -15,10 +15,13 @@ public class EnemyMover : MonoBehaviour
     //Cashe References
     Rigidbody rb;
     GameObject player;
-    PlayerLives playerLives;
 
     //Attributes
 
+    private void Start()
+    {
+        PlayerMover.OnPlayerDeath += EnemyDies;
+    }
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
@@ -30,5 +33,15 @@ public class EnemyMover : MonoBehaviour
         //player pos - enemy pos normalized = direction of velocity
         Vector3 dir = (player.transform.position - transform.position).normalized;
         rb.velocity = dir * fltVelocity;
+    }
+
+    void EnemyDies()
+    {
+        Destroy(gameObject);
+    }
+
+    private void OnDestroy()
+    {
+        PlayerMover.OnPlayerDeath -= EnemyDies;
     }
 }

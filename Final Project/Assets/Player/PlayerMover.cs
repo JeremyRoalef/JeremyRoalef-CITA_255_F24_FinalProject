@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,6 +7,9 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(Rigidbody), typeof(PlayerLives))]
 public class PlayerMover : MonoBehaviour
 {
+    //Event for when the player dies
+    public static event Action OnPlayerDeath;
+
     //Borrowing code from another final project I'm working on to add player movement
 
     //Serialized Fields
@@ -32,6 +36,9 @@ public class PlayerMover : MonoBehaviour
     void Start()
     {
         InitializeReferences();
+        //Subscribe to OnPlayerDeath
+        OnPlayerDeath += PlayerDies;
+        PlayerLives.playerReset += ResetPlayer;
     }
 
     public void InitializeReferences()
@@ -163,17 +170,19 @@ public class PlayerMover : MonoBehaviour
         if (hasDied) {return;}
         if (other.gameObject.CompareTag("Exploder"))
         {
-            hasDied = true;
-            //If player lives = 1 -> playerlives = 1-1 = 0. Value = 0, so statement is true
-            playerLives.Lives -= 1;
-            Destroy(other.gameObject);
+            OnPlayerDeath();
         }
     }
 
-    //This method is repeat of a method in player lives. May make into an event or delegate or something.
-    //For now, this'll suffice
     public void ResetPlayer()
     {
         hasDied = false;
+    }
+
+    void PlayerDies()
+    {
+        hasDied = true;
+        //If player lives = 1 -> playerlives = 1-1 = 0. Value = 0, so statement is true
+        playerLives.Lives -= 1;
     }
 }
